@@ -23,7 +23,9 @@ export default defineConfig({
     strictPort: false,
     allowedHosts: [
       'sdg-13-climate-action.onrender.com',
-      '.onrender.com'
+      '.onrender.com',
+      '.netlify.app',
+      'localhost'
     ]
   }
 })
