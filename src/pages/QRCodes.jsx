@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
@@ -11,77 +11,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
-// QR Code component using a simple canvas-based approach
+// QR Code component using Google Charts API for real, scannable QR codes
 const QRCodeDisplay = ({ value, size = 200, label, icon: Icon }) => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    // Simple QR code pattern generator (for display purposes)
-    // In production, you'd use a proper QR library
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const moduleCount = 25;
-    const moduleSize = size / moduleCount;
-
-    // Clear canvas
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-
-    // Draw QR pattern (simplified representation)
-    ctx.fillStyle = '#000000';
-
-    // Draw finder patterns (corners)
-    const drawFinderPattern = (x, y) => {
-      // Outer square
-      ctx.fillRect(x * moduleSize, y * moduleSize, 7 * moduleSize, 7 * moduleSize);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect((x + 1) * moduleSize, (y + 1) * moduleSize, 5 * moduleSize, 5 * moduleSize);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect((x + 2) * moduleSize, (y + 2) * moduleSize, 3 * moduleSize, 3 * moduleSize);
-    };
-
-    drawFinderPattern(0, 0);
-    drawFinderPattern(moduleCount - 7, 0);
-    drawFinderPattern(0, moduleCount - 7);
-
-    // Generate pseudo-random data modules based on URL
-    const hash = value.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    for (let i = 8; i < moduleCount - 8; i++) {
-      for (let j = 8; j < moduleCount - 8; j++) {
-        if ((i + j + hash) % 3 === 0 || (i * j + hash) % 5 === 0) {
-          ctx.fillRect(i * moduleSize, j * moduleSize, moduleSize, moduleSize);
-        }
-      }
-    }
-
-    // Timing patterns
-    for (let i = 8; i < moduleCount - 8; i++) {
-      if (i % 2 === 0) {
-        ctx.fillRect(6 * moduleSize, i * moduleSize, moduleSize, moduleSize);
-        ctx.fillRect(i * moduleSize, 6 * moduleSize, moduleSize, moduleSize);
-      }
-    }
-
-    // Add some data modules in edges
-    for (let i = 8; i < moduleCount - 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        if ((i + j + hash) % 4 === 0) {
-          ctx.fillRect(i * moduleSize, j * moduleSize, moduleSize, moduleSize);
-          ctx.fillRect(j * moduleSize, i * moduleSize, moduleSize, moduleSize);
-          ctx.fillRect(i * moduleSize, (moduleCount - 1 - j) * moduleSize, moduleSize, moduleSize);
-          ctx.fillRect((moduleCount - 1 - j) * moduleSize, i * moduleSize, moduleSize, moduleSize);
-        }
-      }
-    }
-
-  }, [value, size]);
+  // Using Google Charts API to generate actual scannable QR codes
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
 
   return (
     <div className="flex flex-col items-center">
       <div className="p-4 bg-white rounded-2xl shadow-xl mb-4">
-        <canvas ref={canvasRef} width={size} height={size} className="rounded-lg" />
+        <img 
+          src={qrCodeUrl} 
+          alt={`QR Code for ${label}`}
+          width={size} 
+          height={size}
+          className="rounded-lg"
+        />
       </div>
       <div className="flex items-center gap-2 text-white">
         <Icon className="w-5 h-5" />
